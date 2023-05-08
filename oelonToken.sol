@@ -26,6 +26,8 @@ uint256 public rewardFee = 2;
 
 uint256 public rewardInterval = 4 * 24 * 60 * 60 + 20 * 60;
 uint256 public lastRewardTime;
+uint256 public nextRewardTime;
+
 
 mapping(address => uint256) public lastRewardClaim;
 mapping(address => uint256) private _balanceOf;
@@ -53,6 +55,7 @@ constructor(
     marketingWallet = _marketingWallet;
     liquidityPool = _liquidityPool;
     lastRewardTime = block.timestamp;
+    nextRewardTime = block.timestamp.add(rewardInterval);
     rewardToken = _rewardToken;
     dogeToken = _dogeToken;
     token = _token;
@@ -133,8 +136,10 @@ function _transferWithFees(address sender, address recipient, uint256 amount) pr
     _transfer(sender, address(this), rewardAmount);
     _transfer(sender, recipient, amount.sub(liquidityPoolAmount).sub(marketingAmount).sub(rewardAmount));
 
-    if (block.timestamp >= lastRewardTime.add(rewardInterval)) {
+    if (block.timestamp >= nextRewardTime && IERC20(rewardToken).balanceOf(address(this)) > 0) {
         _distributeRewards();
+        lastRewardTime = nextRewardTime;
+        nextRewardTime = block.timestamp.add(rewardInterval);
     }
 }
 
