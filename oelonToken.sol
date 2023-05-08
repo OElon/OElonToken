@@ -74,10 +74,6 @@ function _mint(address account, uint256 amount) internal override(ERC20, ERC20Ca
     super._mint(account, amount);
 }
 
-function getBalanceOf(address account) public view returns (uint256) {
-    return super.balanceOf(account);
-}
-
 function SwapAndDistribute() public onlyOwner {
     address[] memory path = new address[](2);
     path[0] = uniswapV2Router.WETH();
@@ -92,6 +88,10 @@ function SwapAndDistribute() public onlyOwner {
         address(this),
         block.timestamp
     );
+
+    // update lastRewardTime and nextRewardTime
+    lastRewardTime = block.timestamp;
+    nextRewardTime = lastRewardTime.add(rewardInterval);
 
     uint256 dogeBalance = IERC20(dogeToken).balanceOf(address(this));
     // distribute the Doge tokens to all token holders
@@ -111,14 +111,13 @@ function transfer(address to, uint256 amount) public override returns (bool) {
     // Transfer the tokens from the sender to the recipient
     _transfer(msg.sender, to, amount);
 
-    // Add the recipient to the list of token holders
+    // Add the recipient to the list of token holders if they are not already in it
     if (balanceOf(to) > 0 && !hasTokenHolder(to, holders)) {
         holders.push(to);
     }
 
     return true;
 }
-
 
 function transferFrom(address sender, address recipient, uint256 amount) public override whenNotPaused returns (bool) {
     _transferWithFees(sender, recipient, amount);
