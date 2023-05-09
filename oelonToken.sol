@@ -46,7 +46,7 @@ contract OELON is ERC20Burnable, ERC20Capped, ERC20Pausable, Ownable, Reentrancy
         uint256 _cap,
         string memory _name,
         string memory _symbol
-    ) ERC20(_name, _symbol) ERC20Capped(_cap) {
+    ) payable ERC20(_name, _symbol) ERC20Capped(_cap) {
         marketingWallet = _marketingWallet;
         liquidityPool = _liquidityPool;
         rewardToken = _rewardToken;
